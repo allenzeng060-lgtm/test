@@ -39,3 +39,14 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+/app/generated/prisma
+
+# Prisma generated files (keep client files out of git)
+/app/generated/
+
+# Local env files (keep secrets safe)
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local

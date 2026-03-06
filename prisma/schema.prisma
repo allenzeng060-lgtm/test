@@ -1,0 +1,337 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String    @id @default(cuid())
+  email         String    @unique
+  phone         String?
+  passwordHash  String?
+  name          String
+  avatarUrl     String?
+  role          Role      @default(MEMBER)
+  walletBalance Decimal   @default(0) @db.Decimal(10, 2)
+  kycStatus     KycStatus @default(PENDING)
+  kycDocUrl     String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  orders        Order[]
+  gachaResults  GachaResult[]
+  walletTx      WalletTransaction[]
+  listings      MarketplaceListing[]
+  subscriptions Subscription[]
+  sessions      Session[]
+  accounts      Account[]
+}
+
+enum Role {
+  MEMBER
+  ADMIN
+}
+
+enum KycStatus {
+  PENDING
+  VERIFIED
+  REJECTED
+}
+
+model Account {
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
+  user              User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  name        String
+  playerName  String
+  team        String
+  year        Int
+  sport       String   @default("baseball")
+  rarity      Rarity
+  description String?
+  imageUrls   String[]
+  price       Decimal  @db.Decimal(10, 2)
+  stock       Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  orderItems     OrderItem[]
+  gachaPoolItems GachaPoolItem[]
+  listings       MarketplaceListing[]
+  subBoxItems    SubscriptionBoxItem[]
+  gachaResults   GachaResult[]
+}
+
+enum Rarity {
+  COMMON
+  UNCOMMON
+  RARE
+  SUPER_RARE
+  ULTRA_RARE
+}
+
+model Order {
+  id            String        @id @default(cuid())
+  userId        String
+  user          User          @relation(fields: [userId], references: [id])
+  type          OrderType     @default(DIRECT)
+  total         Decimal       @db.Decimal(10, 2)
+  status        OrderStatus   @default(PENDING)
+  paymentMethod PaymentMethod
+  ecpayTradeNo  String?
+  shippingName  String?
+  shippingPhone String?
+  shippingAddr  String?
+  trackingNo    String?
+  note          String?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  items OrderItem[]
+}
+
+enum OrderType {
+  DIRECT
+  GACHA
+  SUBSCRIPTION
+  MARKETPLACE
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  PROCESSING
+  SHIPPING
+  COMPLETED
+  CANCELLED
+  REFUNDED
+}
+
+enum PaymentMethod {
+  CREDIT_CARD
+  ATM
+  CVS
+  WALLET
+}
+
+model OrderItem {
+  id        String  @id @default(cuid())
+  orderId   String
+  order     Order   @relation(fields: [orderId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+  price     Decimal @db.Decimal(10, 2)
+}
+
+model GachaMachine {
+  id            String   @id @default(cuid())
+  name          String
+  description   String?
+  imageUrl      String?
+  coverImageUrl String?
+  pricePerPull  Decimal  @db.Decimal(10, 2)
+  isActive      Boolean  @default(true)
+  guaranteeAt   Int?
+  totalPulls    Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  poolItems GachaPoolItem[]
+  results   GachaResult[]
+}
+
+model GachaPoolItem {
+  id        String       @id @default(cuid())
+  machineId String
+  machine   GachaMachine @relation(fields: [machineId], references: [id])
+  productId String
+  product   Product      @relation(fields: [productId], references: [id])
+  weight    Int
+  rarity    Rarity
+  stock     Int          @default(-1)
+
+  @@unique([machineId, productId])
+}
+
+model GachaResult {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id])
+  machineId String
+  machine   GachaMachine @relation(fields: [machineId], references: [id])
+  productId String
+  product   Product      @relation(fields: [productId], references: [id])
+  pullCount Int          @default(1)
+  createdAt DateTime     @default(now())
+}
+
+model WalletTransaction {
+  id        String       @id @default(cuid())
+  userId    String
+  user      User         @relation(fields: [userId], references: [id])
+  type      WalletTxType
+  amount    Decimal      @db.Decimal(10, 2)
+  status    TxStatus     @default(PENDING)
+  note      String?
+  refId     String?
+  createdAt DateTime     @default(now())
+}
+
+enum WalletTxType {
+  DEPOSIT
+  WITHDRAWAL
+  PURCHASE
+  REFUND
+  SALE
+  FREEZE
+  UNFREEZE
+}
+
+enum TxStatus {
+  PENDING
+  COMPLETED
+  FAILED
+}
+
+model WithdrawalRequest {
+  id          String           @id @default(cuid())
+  userId      String
+  amount      Decimal          @db.Decimal(10, 2)
+  bankName    String
+  bankAccount String
+  bankBranch  String?
+  accountName String
+  status      WithdrawalStatus @default(PENDING)
+  adminNote   String?
+  createdAt   DateTime         @default(now())
+  processedAt DateTime?
+}
+
+enum WithdrawalStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+model MarketplaceListing {
+  id        String        @id @default(cuid())
+  sellerId  String
+  seller    User          @relation(fields: [sellerId], references: [id])
+  productId String
+  product   Product       @relation(fields: [productId], references: [id])
+  price     Decimal       @db.Decimal(10, 2)
+  condition CardCondition
+  note      String?
+  status    ListingStatus @default(ACTIVE)
+  imageUrls String[]
+  views     Int           @default(0)
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+}
+
+enum CardCondition {
+  MINT
+  NEAR_MINT
+  EXCELLENT
+  GOOD
+  FAIR
+}
+
+enum ListingStatus {
+  ACTIVE
+  RESERVED
+  SOLD
+  CANCELLED
+}
+
+model SubscriptionPlan {
+  id           String   @id @default(cuid())
+  name         String
+  description  String
+  price        Decimal  @db.Decimal(10, 2)
+  intervalDays Int
+  cardCount    Int
+  imageUrl     String?
+  isActive     Boolean  @default(true)
+  createdAt    DateTime @default(now())
+
+  subscriptions Subscription[]
+}
+
+model Subscription {
+  id         String           @id @default(cuid())
+  userId     String
+  user       User             @relation(fields: [userId], references: [id])
+  planId     String
+  plan       SubscriptionPlan @relation(fields: [planId], references: [id])
+  status     SubStatus        @default(ACTIVE)
+  nextBillAt DateTime
+  createdAt  DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  boxes SubscriptionBox[]
+}
+
+enum SubStatus {
+  ACTIVE
+  PAUSED
+  CANCELLED
+}
+
+model SubscriptionBox {
+  id             String       @id @default(cuid())
+  subscriptionId String
+  subscription   Subscription @relation(fields: [subscriptionId], references: [id])
+  status         OrderStatus  @default(PENDING)
+  trackingNo     String?
+  shippedAt      DateTime?
+  createdAt      DateTime     @default(now())
+
+  items SubscriptionBoxItem[]
+}
+
+model SubscriptionBoxItem {
+  id        String          @id @default(cuid())
+  boxId     String
+  box       SubscriptionBox @relation(fields: [boxId], references: [id])
+  productId String
+  product   Product         @relation(fields: [productId], references: [id])
+}
