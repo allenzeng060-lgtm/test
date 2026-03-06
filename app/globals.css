@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+:root {
+  --font-barlow:
+    "Arial Narrow", "Helvetica Neue Condensed", "Roboto Condensed", "Franklin Gothic Medium",
+    sans-serif;
+  --font-inter:
+    "Inter", "SF Pro Display", "Segoe UI", "Helvetica Neue", "PingFang TC", "Noto Sans TC",
+    sans-serif;
+  --font-jetbrains:
+    "JetBrains Mono", "SFMono-Regular", "SF Mono", Menlo, Monaco, Consolas, monospace;
+}
+
 @theme inline {
   /* ===== 品牌色系 ===== */
   --color-bg-primary: #0a0a0f;
@@ -56,6 +67,130 @@ body {
   overflow-x: hidden;
 }
 
+/* ===== Cinematic Stage ===== */
+.cinematic-stage {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(circle at 14% -8%, rgba(201, 168, 76, 0.18) 0%, transparent 42%),
+    radial-gradient(circle at 82% 8%, rgba(124, 58, 237, 0.2) 0%, transparent 38%),
+    radial-gradient(circle at 50% 78%, rgba(0, 212, 255, 0.12) 0%, transparent 45%),
+    linear-gradient(180deg, #0b0b12 0%, #07070d 50%, #06060b 100%);
+}
+
+.cinematic-stage::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background:
+    conic-gradient(
+      from 120deg at 40% -20%,
+      rgba(255, 255, 255, 0.08),
+      transparent 22%,
+      transparent 65%,
+      rgba(255, 255, 255, 0.05) 78%,
+      transparent 100%
+    );
+  opacity: 0.35;
+  animation: drift-light 22s ease-in-out infinite alternate;
+}
+
+.cinematic-stage::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: -1;
+  background: radial-gradient(circle at 50% 45%, transparent 25%, rgba(0, 0, 0, 0.58) 100%);
+}
+
+/* ===== Premium Materials ===== */
+.metal-frame {
+  position: relative;
+}
+
+.metal-frame::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(
+    130deg,
+    rgba(255, 255, 255, 0.34),
+    rgba(255, 255, 255, 0.08) 28%,
+    rgba(201, 168, 76, 0.42) 56%,
+    rgba(0, 212, 255, 0.24) 80%,
+    rgba(255, 255, 255, 0.2)
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* ===== 3D Tilt Card ===== */
+.tilt-card {
+  position: relative;
+  transform-style: preserve-3d;
+  transform: perspective(1200px) rotateX(var(--rx, 0deg)) rotateY(var(--ry, 0deg));
+  transition: transform 0.18s ease, box-shadow 0.3s ease;
+  will-change: transform;
+}
+
+.tilt-card::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  background: radial-gradient(
+    340px circle at var(--mx, 50%) var(--my, 50%),
+    rgba(var(--glow-color, 201, 168, 76), 0.3),
+    rgba(var(--glow-color, 201, 168, 76), 0.08) 32%,
+    transparent 62%
+  );
+  transition: opacity 0.25s ease;
+  mix-blend-mode: screen;
+}
+
+.tilt-card::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  z-index: 2;
+  opacity: 0;
+  background: linear-gradient(
+    112deg,
+    rgba(255, 255, 255, 0.26) 0%,
+    rgba(255, 255, 255, 0.04) 28%,
+    rgba(255, 255, 255, 0) 52%,
+    rgba(255, 255, 255, 0.16) 72%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  transform: translateX(-35%);
+  transition: opacity 0.25s ease, transform 0.5s ease;
+}
+
+.tilt-card:hover {
+  box-shadow: 0 24px 58px rgba(0, 0, 0, 0.52), 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.tilt-card:hover::before {
+  opacity: 1;
+}
+
+.tilt-card:hover::after {
+  opacity: 0.65;
+  transform: translateX(40%);
+}
+
 /* ===== 自定義捲軸 ===== */
 ::-webkit-scrollbar {
   width: 6px;
@@ -108,6 +243,37 @@ body {
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+.collector-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.35rem 0.7rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.collector-badge-hot {
+  color: #ff8f5a;
+  border-color: rgba(255, 143, 90, 0.25);
+  box-shadow: 0 0 24px rgba(255, 143, 90, 0.14);
+}
+
+.collector-badge-rising {
+  color: #00d4ff;
+  border-color: rgba(0, 212, 255, 0.22);
+  box-shadow: 0 0 24px rgba(0, 212, 255, 0.12);
+}
+
+.collector-badge-low {
+  color: #9ba6bb;
+  border-color: rgba(155, 166, 187, 0.2);
 }
 
 /* ===== 發光按鈕 ===== */
@@ -199,11 +365,36 @@ body {
   100% { transform: translateX(100%); }
 }
 
+@keyframes drift-light {
+  0% {
+    transform: translateX(-2%) translateY(-1%) scale(1);
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateX(2%) translateY(1%) scale(1.04);
+    opacity: 0.45;
+  }
+}
+
 .animate-float { animation: float 4s ease-in-out infinite; }
 .animate-float-delay-1 { animation: float 4s ease-in-out 1s infinite; }
 .animate-float-delay-2 { animation: float 4s ease-in-out 2s infinite; }
 .animate-pulse-glow { animation: pulse-glow 2s ease-in-out infinite; }
 .animate-spin-slow { animation: spin-slow 8s linear infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .tilt-card {
+    transition: none;
+    transform: none;
+  }
+
+  .tilt-card::before,
+  .tilt-card::after,
+  .cinematic-stage::before {
+    animation: none !important;
+    transition: none !important;
+  }
+}
 
 /* ===== 粒子背景 ===== */
 .particle-bg {

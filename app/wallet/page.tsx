@@ -1,8 +1,20 @@
 "use client";
 
-import { ArrowUpRight, ArrowDownLeft, Wallet, History, Plus, Minus, ShoppingCart } from "lucide-react";
+import { motion } from "framer-motion";
+import {
+  ArrowUpRight,
+  ArrowDownLeft,
+  Wallet,
+  History,
+  Plus,
+  Minus,
+  ShoppingCart,
+  AreaChart,
+} from "lucide-react";
 import Link from "next/link";
 import Navbar from "@/components/layout/Navbar";
+import LineChart from "@/components/charts/LineChart";
+import ParticlesBackdrop from "@/components/ui/ParticlesBackdrop";
 
 const DEMO_TRANSACTIONS = [
   { id: "1", type: "DEPOSIT", amount: 5000, status: "COMPLETED", note: "信用卡儲值", createdAt: "2024-01-15 14:30" },
@@ -11,6 +23,15 @@ const DEMO_TRANSACTIONS = [
   { id: "4", type: "SALE", amount: 3200, status: "COMPLETED", note: "出售：林子偉 前景卡", createdAt: "2024-01-14 10:20" },
   { id: "5", type: "WITHDRAWAL", amount: -2000, status: "PENDING", note: "提領至玉山銀行", createdAt: "2024-01-13 09:00" },
   { id: "6", type: "DEPOSIT", amount: 10000, status: "COMPLETED", note: "ATM 轉帳儲值", createdAt: "2024-01-12 16:45" },
+];
+
+const BALANCE_HISTORY = [
+  { label: "01", value: 8800 },
+  { label: "05", value: 11200 },
+  { label: "10", value: 10400 },
+  { label: "15", value: 15500 },
+  { label: "20", value: 14800 },
+  { label: "Now", value: 15500 },
 ];
 
 const txIcon: Record<string, React.ReactNode> = {
@@ -34,144 +55,136 @@ export default function WalletPage() {
   const frozen = 2000;
 
   return (
-    <div className="min-h-screen bg-[#0a0a0f]">
+    <div className="min-h-screen cinematic-stage">
+      <ParticlesBackdrop count={46} className="opacity-40" />
       <Navbar />
-      <div className="pt-16">
-        {/* 頁首 */}
+
+      <div className="pt-16 relative">
         <div className="bg-[#12121a] border-b border-white/[0.06]">
-          <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-            <h1
-              className="text-4xl font-black text-white mb-1"
-              style={{ fontFamily: "var(--font-barlow)" }}
-            >
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+            <div className="text-xs uppercase tracking-[0.26em] text-[#c9a84c] mb-3">
+              Asset Vault
+            </div>
+            <h1 className="text-4xl font-black text-white mb-1" style={{ fontFamily: "var(--font-barlow)" }}>
               我的錢包
             </h1>
-            <p className="text-[#a0a0b8]">管理你的餘額、儲值與提領</p>
+            <p className="text-[#a0a0b8]">管理餘額、追蹤收藏資產與金流動態</p>
           </div>
         </div>
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          {/* 餘額卡片 */}
-          <div className="grid md:grid-cols-3 gap-4 mb-8">
-            {/* 主要餘額 */}
-            <div
-              className="md:col-span-2 relative rounded-2xl p-8 overflow-hidden"
-              style={{
-                background: "linear-gradient(135deg, #1a1a2e 0%, #22223a 50%, #1a1a2e 100%)",
-                border: "1px solid rgba(201,168,76,0.2)",
-                boxShadow: "0 20px 60px rgba(0,0,0,0.4)",
-              }}
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid lg:grid-cols-[1.2fr_0.8fr] gap-5 mb-8">
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.55 }}
+              className="glass-panel metal-frame rounded-[28px] p-6 sm:p-7 overflow-hidden relative"
             >
-              {/* 背景光暈 */}
-              <div
-                className="absolute inset-0 opacity-30 pointer-events-none"
-                style={{ background: "radial-gradient(ellipse at 80% 50%, rgba(201,168,76,0.15) 0%, transparent 60%)" }}
-              />
-
+              <div className="absolute inset-0 opacity-35 pointer-events-none bg-[radial-gradient(circle_at_80%_40%,rgba(201,168,76,0.18),transparent_48%)]" />
               <div className="relative">
                 <div className="flex items-center gap-2 mb-4">
                   <Wallet className="w-5 h-5 text-[#c9a84c]" />
                   <span className="text-sm text-[#a0a0b8]">可用餘額</span>
                 </div>
-                <div
-                  className="text-5xl font-black text-gradient-gold mb-2"
-                  style={{ fontFamily: "var(--font-barlow)" }}
-                >
+                <div className="text-5xl font-black text-gradient-gold mb-2" style={{ fontFamily: "var(--font-barlow)" }}>
                   NT$ {balance.toLocaleString()}
                 </div>
-                {frozen > 0 && (
-                  <div className="text-sm text-[#5a5a7a]">
-                    凍結中：NT$ {frozen.toLocaleString()}（交易保護）
-                  </div>
-                )}
+                <div className="text-sm text-[#6f7789]">
+                  凍結中：NT$ {frozen.toLocaleString()}（交易保護）
+                </div>
 
-                {/* 按鈕 */}
                 <div className="flex gap-3 mt-6">
-                  <Link
-                    href="/wallet/deposit"
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl btn-primary text-sm"
-                  >
+                  <Link href="/wallet/deposit" className="flex items-center gap-2 px-5 py-2.5 rounded-xl btn-primary text-sm">
                     <Plus className="w-4 h-4" />
                     儲值
                   </Link>
-                  <Link
-                    href="/wallet/withdraw"
-                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl btn-secondary text-sm"
-                  >
+                  <Link href="/wallet/withdraw" className="flex items-center gap-2 px-5 py-2.5 rounded-xl btn-secondary text-sm">
                     <Minus className="w-4 h-4" />
                     提領
                   </Link>
                 </div>
               </div>
-            </div>
+            </motion.div>
 
-            {/* 本月統計 */}
-            <div className="glass-panel rounded-2xl p-6 flex flex-col justify-between">
-              <div>
-                <div className="text-xs text-[#5a5a7a] uppercase tracking-wider mb-4">本月統計</div>
-                <div className="space-y-4">
-                  <div>
-                    <div className="text-xs text-[#a0a0b8] mb-1">儲值</div>
-                    <div className="text-xl font-black text-[#22c55e]" style={{ fontFamily: "var(--font-barlow)" }}>
-                      + NT$ 15,000
-                    </div>
+            <motion.div
+              initial={{ opacity: 0, y: 18 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.06 }}
+              className="glass-panel metal-frame rounded-[28px] p-6"
+            >
+              <div className="text-xs uppercase tracking-[0.24em] text-[#6d7385] mb-4">本月統計</div>
+              <div className="space-y-4">
+                <div>
+                  <div className="text-xs text-[#a0a0b8] mb-1">儲值</div>
+                  <div className="text-xl font-black text-[#22c55e]" style={{ fontFamily: "var(--font-barlow)" }}>
+                    + NT$ 15,000
                   </div>
-                  <div>
-                    <div className="text-xs text-[#a0a0b8] mb-1">消費</div>
-                    <div className="text-xl font-black text-red-400" style={{ fontFamily: "var(--font-barlow)" }}>
-                      - NT$ 3,200
-                    </div>
+                </div>
+                <div>
+                  <div className="text-xs text-[#a0a0b8] mb-1">消費</div>
+                  <div className="text-xl font-black text-red-400" style={{ fontFamily: "var(--font-barlow)" }}>
+                    - NT$ 3,200
                   </div>
-                  <div>
-                    <div className="text-xs text-[#a0a0b8] mb-1">銷售收入</div>
-                    <div className="text-xl font-black text-[#3b82f6]" style={{ fontFamily: "var(--font-barlow)" }}>
-                      + NT$ 3,200
-                    </div>
+                </div>
+                <div>
+                  <div className="text-xs text-[#a0a0b8] mb-1">銷售收入</div>
+                  <div className="text-xl font-black text-[#3b82f6]" style={{ fontFamily: "var(--font-barlow)" }}>
+                    + NT$ 3,200
                   </div>
                 </div>
               </div>
-              <Link href="/profile/orders" className="text-xs text-[#c9a84c] hover:underline">
-                查看詳細報表 →
-              </Link>
-            </div>
+            </motion.div>
           </div>
 
-          {/* 交易記錄 */}
-          <div>
-            <div className="flex items-center justify-between mb-5">
-              <div className="flex items-center gap-2">
-                <History className="w-4 h-4 text-[#c9a84c]" />
-                <h2
-                  className="text-lg font-black text-white"
-                  style={{ fontFamily: "var(--font-barlow)" }}
-                >
-                  交易記錄
-                </h2>
-              </div>
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.65, delay: 0.08 }}
+            className="glass-panel metal-frame rounded-[28px] p-6 sm:p-7 mb-8"
+          >
+            <div className="flex items-center gap-2 mb-6">
+              <AreaChart className="w-4 h-4 text-[#00d4ff]" />
+              <h2 className="text-2xl font-black text-white" style={{ fontFamily: "var(--font-barlow)" }}>
+                Balance Chart
+              </h2>
+            </div>
+            <LineChart data={BALANCE_HISTORY} accentColor="#00d4ff" />
+          </motion.div>
+
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.7, delay: 0.12 }}
+          >
+            <div className="flex items-center gap-2 mb-5">
+              <History className="w-4 h-4 text-[#c9a84c]" />
+              <h2 className="text-lg font-black text-white" style={{ fontFamily: "var(--font-barlow)" }}>
+                交易記錄
+              </h2>
             </div>
 
-            <div className="glass-panel rounded-2xl overflow-hidden">
+            <div className="glass-panel metal-frame rounded-[28px] overflow-hidden">
               {DEMO_TRANSACTIONS.map((tx, idx) => {
                 const isPositive = tx.amount > 0;
                 return (
-                  <div
+                  <motion.div
                     key={tx.id}
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.45, delay: idx * 0.03 }}
                     className={`flex items-center gap-4 px-6 py-4 hover:bg-white/[0.02] transition-colors ${
                       idx < DEMO_TRANSACTIONS.length - 1 ? "border-b border-white/[0.05]" : ""
                     }`}
                   >
-                    {/* 圖示 */}
                     <div className="w-9 h-9 rounded-xl glass-panel flex items-center justify-center flex-shrink-0">
                       {txIcon[tx.type]}
                     </div>
 
-                    {/* 說明 */}
                     <div className="flex-1 min-w-0">
                       <div className="text-sm font-medium text-white">{txLabel[tx.type]}</div>
                       <div className="text-xs text-[#5a5a7a]">{tx.note}</div>
                     </div>
 
-                    {/* 狀態 */}
                     <div className="text-right">
                       <div
                         className={`text-base font-black ${isPositive ? "text-[#22c55e]" : "text-[#a0a0b8]"}`}
@@ -188,11 +201,11 @@ export default function WalletPage() {
                         <div className="text-[10px] text-[#5a5a7a]">{tx.createdAt}</div>
                       </div>
                     </div>
-                  </div>
+                  </motion.div>
                 );
               })}
             </div>
-          </div>
+          </motion.div>
         </div>
       </div>
     </div>

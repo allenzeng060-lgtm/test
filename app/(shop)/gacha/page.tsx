@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { rarityColor } from "@/lib/utils";
+import { DEMO_PRODUCTS } from "@/lib/mock-data";
 
 const GACHA_MACHINES = [
   {
@@ -13,6 +14,7 @@ const GACHA_MACHINES = [
     guarantee: "10抽保底",
     emoji: "✦",
     totalPulls: 1248,
+    imageUrl: DEMO_PRODUCTS[0].imageUrl,
     odds: [
       { rarity: "ULTRA_RARE", percent: "2%" },
       { rarity: "SUPER_RARE", percent: "8%" },
@@ -32,6 +34,7 @@ const GACHA_MACHINES = [
     guarantee: "20抽保底",
     emoji: "◈",
     totalPulls: 3621,
+    imageUrl: DEMO_PRODUCTS[1].imageUrl,
     odds: [
       { rarity: "SUPER_RARE", percent: "10%" },
       { rarity: "RARE", percent: "25%" },
@@ -50,6 +53,7 @@ const GACHA_MACHINES = [
     guarantee: "30抽保底",
     emoji: "◆",
     totalPulls: 8432,
+    imageUrl: DEMO_PRODUCTS[2].imageUrl,
     odds: [
       { rarity: "RARE", percent: "30%" },
       { rarity: "UNCOMMON", percent: "40%" },
@@ -67,12 +71,13 @@ const GACHA_MACHINES = [
     guarantee: "無保底",
     emoji: "◇",
     totalPulls: 15890,
+    imageUrl: DEMO_PRODUCTS[5].imageUrl,
     odds: [
       { rarity: "UNCOMMON", percent: "20%" },
       { rarity: "COMMON", percent: "80%" },
     ],
   },
-];
+] as const;
 
 const rarityLabelMap: Record<string, string> = {
   ULTRA_RARE: "ULTRA RARE",
@@ -85,19 +90,14 @@ const rarityLabelMap: Record<string, string> = {
 export default function GachaPage() {
   return (
     <div className="min-h-screen">
-      {/* 頁首 */}
       <div className="relative bg-[#12121a] border-b border-white/[0.06] overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none"
+        <div
+          className="absolute inset-0 pointer-events-none"
           style={{ background: "radial-gradient(ellipse at 50% -30%, rgba(124,58,237,0.2) 0%, transparent 60%)" }}
         />
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
-          <div className="text-xs font-semibold text-[#a855f7] tracking-[0.3em] uppercase mb-3">
-            Mystery Box
-          </div>
-          <h1
-            className="text-5xl md:text-6xl font-black text-white mb-3"
-            style={{ fontFamily: "var(--font-barlow)" }}
-          >
+          <div className="text-xs font-semibold text-[#a855f7] tracking-[0.3em] uppercase mb-3">Mystery Box</div>
+          <h1 className="text-5xl md:text-6xl font-black text-white mb-3" style={{ fontFamily: "var(--font-barlow)" }}>
             扭蛋盲盒
           </h1>
           <p className="text-[#a0a0b8] max-w-lg">
@@ -112,41 +112,27 @@ export default function GachaPage() {
           {GACHA_MACHINES.map((machine) => (
             <div
               key={machine.id}
-              className={`relative rounded-3xl glass-panel border border-white/[0.06] overflow-hidden group transition-all duration-300 hover:border-white/20 hover:scale-[1.01]`}
+              className="relative rounded-3xl glass-panel border border-white/[0.06] overflow-hidden group transition-all duration-300 hover:border-white/20 hover:scale-[1.01]"
             >
-              {/* 背景光暈 */}
               <div
                 className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                style={{ background: `radial-gradient(ellipse at 50% 0%, ${machine.color}10 0%, transparent 70%)` }}
+                style={{ background: `radial-gradient(ellipse at 50% 0%, ${machine.color}16 0%, transparent 70%)` }}
               />
 
-              <div className="p-8">
-                <div className="flex items-start gap-6">
-                  {/* 盲盒圖示 */}
+              <div className="p-6 sm:p-8">
+                <div className="flex items-start gap-4 sm:gap-6">
                   <div className="flex-shrink-0">
-                    <div
-                      className={`w-24 h-24 rounded-2xl flex items-center justify-center text-5xl font-black ${machine.glowClass} group-hover:scale-110 transition-transform duration-300`}
-                      style={{
-                        background: `linear-gradient(135deg, ${machine.color}20, ${machine.color}05)`,
-                        border: `2px solid ${machine.color}40`,
-                        color: machine.color,
-                        fontFamily: "var(--font-barlow)",
-                      }}
-                    >
-                      {machine.emoji}
+                    <div className={`w-24 h-24 rounded-2xl overflow-hidden border-2 ${machine.glowClass} group-hover:scale-110 transition-transform duration-300`} style={{ borderColor: `${machine.color}60` }}>
+                      <img src={machine.imageUrl} alt={`${machine.name} 封面`} className="w-full h-full object-cover" loading="lazy" />
                     </div>
                     <div className="mt-3 text-center">
                       <div className="text-xs text-[#5a5a7a]">總開箱數</div>
-                      <div
-                        className="text-sm font-black"
-                        style={{ fontFamily: "var(--font-barlow)", color: machine.color }}
-                      >
+                      <div className="text-sm font-black" style={{ fontFamily: "var(--font-barlow)", color: machine.color }}>
                         {machine.totalPulls.toLocaleString()}
                       </div>
                     </div>
                   </div>
 
-                  {/* 內容 */}
                   <div className="flex-1">
                     <div
                       className="text-[9px] font-black tracking-[0.2em] px-2 py-0.5 rounded-full border mb-2 w-fit"
@@ -154,29 +140,20 @@ export default function GachaPage() {
                     >
                       {rarityLabelMap[machine.topRarity]}
                     </div>
-                    <h2
-                      className="text-2xl font-black text-white mb-2"
-                      style={{ fontFamily: "var(--font-barlow)" }}
-                    >
+                    <h2 className="text-2xl font-black text-white mb-2" style={{ fontFamily: "var(--font-barlow)" }}>
                       {machine.name}
                     </h2>
-                    <p className="text-sm text-[#a0a0b8] mb-4 leading-relaxed">
-                      {machine.description}
-                    </p>
+                    <p className="text-sm text-[#a0a0b8] mb-4 leading-relaxed">{machine.description}</p>
 
-                    {/* 機率表 */}
                     <div className="glass-panel rounded-xl p-3 mb-4">
                       <div className="text-[10px] text-[#5a5a7a] uppercase tracking-wider mb-2">機率公告</div>
                       <div className="space-y-1.5">
                         {machine.odds.map(({ rarity, percent }) => {
                           const color = rarityColor(rarity);
-                          const pct = parseInt(percent);
+                          const pct = parseInt(percent, 10);
                           return (
-                            <div key={rarity} className="flex items-center gap-2">
-                              <span
-                                className="text-[9px] font-black w-20 flex-shrink-0"
-                                style={{ color }}
-                              >
+                            <div key={`${machine.id}-${rarity}`} className="flex items-center gap-2">
+                              <span className="text-[9px] font-black w-20 flex-shrink-0" style={{ color }}>
                                 {rarityLabelMap[rarity]}
                               </span>
                               <div className="flex-1 h-1.5 rounded-full bg-white/5">
@@ -192,14 +169,10 @@ export default function GachaPage() {
                       </div>
                     </div>
 
-                    {/* 價格和按鈕 */}
                     <div className="flex items-center gap-3">
                       <div>
                         <div className="text-xs text-[#5a5a7a]">每抽價格</div>
-                        <div
-                          className="text-3xl font-black"
-                          style={{ fontFamily: "var(--font-barlow)", color: machine.color }}
-                        >
+                        <div className="text-3xl font-black" style={{ fontFamily: "var(--font-barlow)", color: machine.color }}>
                           NT$ {machine.price}
                         </div>
                       </div>
@@ -228,7 +201,6 @@ export default function GachaPage() {
                 </div>
               </div>
 
-              {/* 保底標示 */}
               <div
                 className="absolute top-4 right-4 text-[10px] font-bold px-2 py-1 rounded-full"
                 style={{ backgroundColor: `${machine.color}15`, color: machine.color, border: `1px solid ${machine.color}30` }}
@@ -239,25 +211,21 @@ export default function GachaPage() {
           ))}
         </div>
 
-        {/* 說明區 */}
         <div className="mt-12 glass-panel rounded-2xl p-8">
-          <h3
-            className="text-xl font-black text-white mb-4"
-            style={{ fontFamily: "var(--font-barlow)" }}
-          >
+          <h3 className="text-xl font-black text-white mb-4" style={{ fontFamily: "var(--font-barlow)" }}>
             開盒說明
           </h3>
           <div className="grid sm:grid-cols-3 gap-6 text-sm text-[#a0a0b8]">
             <div>
-              <div className="text-[#c9a84c] font-semibold mb-2">💳 付款方式</div>
+              <div className="text-[#c9a84c] font-semibold mb-2">付款方式</div>
               <p>使用錢包餘額即時抽取，或直接信用卡/ATM付款。儲值越多，享受更流暢的抽卡體驗。</p>
             </div>
             <div>
-              <div className="text-[#c9a84c] font-semibold mb-2">📦 卡牌配送</div>
+              <div className="text-[#c9a84c] font-semibold mb-2">卡牌配送</div>
               <p>抽到的實體卡牌將於 3-5 個工作天內出貨。電子記錄即時存入你的收藏中心。</p>
             </div>
             <div>
-              <div className="text-[#c9a84c] font-semibold mb-2">🔒 機率公開</div>
+              <div className="text-[#c9a84c] font-semibold mb-2">機率公開</div>
               <p>所有機率均已公開揭示，符合消費者保護法規。每次抽取均由伺服器端公正隨機決定。</p>
             </div>
           </div>

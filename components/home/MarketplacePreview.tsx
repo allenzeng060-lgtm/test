@@ -1,14 +1,16 @@
+"use client";
+
 import Link from "next/link";
+import { motion } from "framer-motion";
 import { ArrowRight, Store, TrendingUp } from "lucide-react";
 import { rarityColor, rarityLabel, formatPrice } from "@/lib/utils";
+import {
+  DEMO_MARKETPLACE_LISTINGS,
+  type DemoMarketplaceListing,
+} from "@/lib/mock-data";
+import TiltCard from "@/components/ui/TiltCard";
 
-const LISTINGS = [
-  { id: "1", playerName: "陳偉殷", team: "洋基", year: 2023, rarity: "SUPER_RARE", price: 12000, condition: "MINT", seller: "Card_Master" },
-  { id: "2", playerName: "王建民", team: "洋基", year: 2006, rarity: "RARE", price: 5800, condition: "NEAR_MINT", seller: "LegendCards" },
-  { id: "3", playerName: "林子偉", team: "紅襪", year: 2022, rarity: "UNCOMMON", price: 800, condition: "EXCELLENT", seller: "BaseballFan" },
-];
-
-const conditionLabel: Record<string, string> = {
+const conditionLabel: Record<DemoMarketplaceListing["condition"], string> = {
   MINT: "全新",
   NEAR_MINT: "近全新",
   EXCELLENT: "極佳",
@@ -42,63 +44,67 @@ export default function MarketplacePreview() {
         </div>
 
         <div className="grid md:grid-cols-3 gap-4 mb-8">
-          {LISTINGS.map((item) => {
+          {DEMO_MARKETPLACE_LISTINGS.map((item, index) => {
             const color = rarityColor(item.rarity);
             return (
-              <Link key={item.id} href={`/marketplace/${item.id}`}>
-                <div className="glass-panel rounded-2xl p-5 hover:border-white/20 hover:scale-[1.02] transition-all duration-300 group cursor-pointer">
-                  <div className="flex items-center gap-3 mb-4">
-                    {/* 卡片縮圖 */}
-                    <div
-                      className="w-12 h-16 rounded-lg flex items-center justify-center font-black text-lg flex-shrink-0"
-                      style={{
-                        background: `linear-gradient(135deg, ${color}20, transparent)`,
-                        border: `1px solid ${color}30`,
-                        color,
-                        fontFamily: "var(--font-barlow)",
-                      }}
-                    >
-                      {item.playerName[0]}
+              <motion.div
+                key={item.id}
+                initial={{ opacity: 0, y: 18 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, amount: 0.3 }}
+                transition={{ duration: 0.45, delay: index * 0.06 }}
+              >
+                <Link href={`/marketplace/${item.id}`}>
+                  <TiltCard
+                    glowColor={color}
+                    className="glass-panel metal-frame rounded-2xl p-5 hover:border-white/20 hover:scale-[1.02] transition-all duration-300 group cursor-pointer"
+                  >
+                    <div className="flex items-center gap-3 mb-4">
+                      <div className="w-14 h-16 rounded-lg overflow-hidden flex-shrink-0 border border-white/10">
+                        <img
+                          src={item.imageUrl}
+                          alt={`${item.playerName} 卡片`}
+                          className="w-full h-full object-cover"
+                          loading="lazy"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div
+                          className="text-[9px] font-black tracking-wider px-2 py-0.5 rounded-full border mb-1 w-fit"
+                          style={{ color, borderColor: `${color}40`, backgroundColor: `${color}10` }}
+                        >
+                          {rarityLabel(item.rarity)}
+                        </div>
+                        <div className="font-semibold text-white text-sm truncate">{item.playerName}</div>
+                        <div className="text-xs text-[#5a5a7a]">
+                          {item.team} · {item.year}
+                        </div>
+                      </div>
                     </div>
-                    <div className="flex-1 min-w-0">
-                      <div
-                        className="text-[9px] font-black tracking-wider px-2 py-0.5 rounded-full border mb-1 w-fit"
-                        style={{ color, borderColor: `${color}40`, backgroundColor: `${color}10` }}
-                      >
-                        {rarityLabel(item.rarity)}
-                      </div>
-                      <div className="font-semibold text-white text-sm truncate">
-                        {item.playerName}
-                      </div>
-                      <div className="text-xs text-[#5a5a7a]">
-                        {item.team} · {item.year}
-                      </div>
-                    </div>
-                  </div>
 
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <div
-                        className="text-xl font-black"
-                        style={{ fontFamily: "var(--font-barlow)", color }}
-                      >
-                        {formatPrice(item.price)}
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <div
+                          className="text-xl font-black"
+                          style={{ fontFamily: "var(--font-barlow)", color }}
+                        >
+                          {formatPrice(item.price)}
+                        </div>
+                        <div className="text-xs text-[#5a5a7a]">
+                          卡況：{conditionLabel[item.condition]} · 賣家：{item.seller}
+                        </div>
                       </div>
-                      <div className="text-xs text-[#5a5a7a]">
-                        卡況：{conditionLabel[item.condition]} · 賣家：{item.seller}
+                      <div className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/20 group-hover:bg-[#00d4ff]/20 transition-colors">
+                        購買
                       </div>
                     </div>
-                    <div className="px-3 py-1.5 rounded-lg text-xs font-bold bg-[#00d4ff]/10 text-[#00d4ff] border border-[#00d4ff]/20 group-hover:bg-[#00d4ff]/20 transition-colors">
-                      購買
-                    </div>
-                  </div>
-                </div>
-              </Link>
+                  </TiltCard>
+                </Link>
+              </motion.div>
             );
           })}
         </div>
 
-        {/* 賣家 CTA */}
         <div className="glass-panel rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-xl bg-[#00d4ff]/10 border border-[#00d4ff]/20 flex items-center justify-center">
@@ -110,10 +116,7 @@ export default function MarketplacePreview() {
             </div>
           </div>
           <div className="flex gap-3">
-            <Link
-              href="/profile/listings"
-              className="px-5 py-2.5 rounded-xl btn-secondary text-sm"
-            >
+            <Link href="/profile/listings" className="px-5 py-2.5 rounded-xl btn-secondary text-sm">
               立即上架
             </Link>
             <Link
